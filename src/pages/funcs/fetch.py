@@ -132,10 +132,11 @@ def homePage(ticker):
         fig : plotly.graph_objects object
         [currentPriceVal, open, close, high, low, fiftyTwoWeekHigh, fiftyTwoWeekLow] : list
     """
+    currentUnixTime = int(time.time())
     # We found out that Yahoo Finance generates its historical data CSV using a link that uses UNIX timestamps
     # We took the sample URL for a random stock and modified it as necessary 
     # The parts next to period1 and period2 are converting the current time to UNIX and subtracting 3 months worth of seconds and the latter being just the current time in UNIX
-    df = pd.read_csv(f'https://query1.finance.yahoo.com/v7/finance/download/{ticker}?period1={int(time.time()-7689600)}&period2={int(time.time())}&interval=1wk&events=history&includeAdjustedClose=true')
+    df = pd.read_csv(f'https://query1.finance.yahoo.com/v7/finance/download/{ticker}?period1={currentUnixTime - 63072000}&period2={currentUnixTime}&interval=1d&events=history&includeAdjustedClose=true')
 
     # Generating the figure using the plotly.graph_objects library 
     # The first and only parameter is the data which contains the type of graph and the data where Data is on the x-axis and the candlesticks use open, high, low, and close numbers

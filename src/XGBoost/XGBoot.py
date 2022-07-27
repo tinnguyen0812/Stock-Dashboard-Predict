@@ -10,6 +10,8 @@ from sklearn.metrics import mean_squared_error
 from sklearn.preprocessing import StandardScaler
 from tqdm import tqdm
 from xgboost import XGBRegressor
+import plotly.graph_objects as go
+import datetime
 
 test_size = 0.2                # proportion of dataset to be used as test set
 N = 3                          # for feature at day t, we use lags from t-1, t-2, ..., t-N as features
@@ -23,10 +25,12 @@ def get_mape(y_true, y_pred):
     y_true, y_pred = np.array(y_true), np.array(y_pred)
     return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
 
-def _load_data():
+def _load_data(ticker,time_frame):
 
     stk_path = "./VTI.csv"
-    df = pd.read_csv(stk_path, sep=",")
+    currentUnixTime = int(time.time())
+    df = pd.read_csv(f'https://query1.finance.yahoo.com/v7/finance/download/{ticker}?period1={currentUnixTime - 63072000}&period2={currentUnixTime}&interval={time_frame}&events=history&includeAdjustedClose=true')
+    print('data',df)
     # Convert Date column to datetime
     df.loc[:, 'Date'] = pd.to_datetime(df['Date'], format='%Y-%m-%d')
     # Change all column headings to be lower case, and remove spacing
@@ -35,7 +39,7 @@ def _load_data():
     df['month'] = df['date'].dt.month
     # Sort by datetime
     df.sort_values(by='date', inplace=True, ascending=True)
-
+    print('data return',df)
     return df
 
 def feature_engineer(df):
@@ -49,7 +53,7 @@ def feature_engineer(df):
     for col in lag_cols:
         for i in shift_range:
 
-            new_col='{}_lag_{}'.format(col, i)   # 格式化字符串
+            new_col='{}_lag_{}'.format(col, i) 
             df[new_col]=df[col].shift(i)
 
     return df[N:]
@@ -64,7 +68,7 @@ def scale_row(row, feat_mean, feat_std):
     Outputs
         row_scaled : pandas series with same length as row, but scaled
     """
-    # If feat_std = 0 (this happens if adj_close doesn't change over N days),
+    # If feat_std = 0 (this happens if adj_adj doesn't change over N days),
     # set it to a small number to avoid division by zero
     feat_std = 0.001 if feat_std == 0 else feat_std
     row_scaled = (row - feat_mean) / feat_std
@@ -84,7 +88,7 @@ def get_mov_avg_std(df, col, N):
     mean_list = df[col].rolling(window=N, min_periods=1).mean()  # len(mean_list) = len(df)
     std_list = df[col].rolling(window=N, min_periods=1).std()  # first value will be NaN, because normalized by N-1
 
-    # Add one timestep to the predictions ,这里又shift了一步
+    # Add one timestep to the predictions 
     mean_list = np.concatenate((np.array([np.nan]), np.array(mean_list[:-1])))
     std_list = np.concatenate((np.array([np.nan]), np.array(std_list[:-1])))
 
@@ -95,15 +99,14 @@ def get_mov_avg_std(df, col, N):
 
     return df_out
 
-if __name__ == '__main__':
+def XGBoostAl(ticker,time_frame):
+    
+    data_df=_load_data(ticker,time_frame)
 
-    # 第一步：获取数据
-    data_df=_load_data()
-
-    # 第二步：特征工程
+    
     df=feature_engineer(data_df)
 
-    # 第三步：数据标准化，先统一计算出标准化的数据，在对其进行数据切分。
+   
     cols_list = [
         "adj_close",
         "range_hl",
@@ -114,13 +117,13 @@ if __name__ == '__main__':
         df = get_mov_avg_std(df, col, N)
 
 
-    # 第四步：生成训练数据和测试数据。因训练数据和测试数据的标准化方式不同，因此需切分训练和测试数据。
+    
     num_test = int(test_size * len(df))
     num_train = len(df) - num_test
     train = df[:num_train]
     test = df[num_train:]
 
-    # 第五步：标签和特征的标准化，此步的目的是为了对在训练集不能代表总体的情况下，使树模型正确运行的一种取巧
+    
     cols_to_scale = [
         "adj_close"
     ]
@@ -130,7 +133,7 @@ if __name__ == '__main__':
         cols_to_scale.append("range_oc_lag_" + str(i))
         cols_to_scale.append("volume_lag_" + str(i))
 
-    scaler = StandardScaler() # 启示三：标准化也不应带测试集，以避免信息泄漏
+    scaler = StandardScaler()
     train_scaled = scaler.fit_transform(train[cols_to_scale])
     # Convert the numpy array back into pandas dataframe
     train_scaled = pd.DataFrame(train_scaled, columns=cols_to_scale)
@@ -142,7 +145,6 @@ if __name__ == '__main__':
         temp = test.apply(lambda row: scale_row(row[feat_list], row[col + '_mean'], row[col + '_std']), axis=1)
         test_scaled = pd.concat([test_scaled, temp], axis=1)
 
-    # 第六步：建立样本
     features = []
     for i in range(1, N + 1):
         features.append("adj_close_lag_" + str(i))
@@ -161,7 +163,6 @@ if __name__ == '__main__':
     y_train_scaled = train_scaled[target]
     X_sample_scaled = test_scaled[features]
 
-    # 第七步：开始训练
     from sklearn.model_selection import GridSearchCV
     parameters={'n_estimators':[90],
                 'max_depth':[7],
@@ -186,7 +187,7 @@ if __name__ == '__main__':
     gs=GridSearchCV(estimator= model,param_grid=parameters,cv=5,refit= True,scoring='neg_mean_squared_error')
 
     gs.fit(X_train_scaled,y_train_scaled)
-    print ('最优参数: ' + str(gs.best_params_))
+    print ('accuracy: ' + str(gs.best_params_))
 
     est_scaled = gs.predict(X_train_scaled)
     train['est'] = est_scaled * math.sqrt(scaler.var_[0]) + scaler.mean_[0]
@@ -194,18 +195,28 @@ if __name__ == '__main__':
     pre_y_scaled = gs.predict(X_sample_scaled)
     test['pre_y_scaled'] = pre_y_scaled
     test['pre_y']=test['pre_y_scaled'] * test['adj_close_std'] + test['adj_close_mean']
+    #test['date'] = datetime.datetime(test['date'])
+    layout = go.Layout(
+        title = "XGBoost Prediction",
+        xaxis = {'title' : "Date"},
+        yaxis = {'title' : "Adj_close"}
+    )
 
-    #plt.figure()
-    ax = test.plot(x='date', y='adj_close', style='b-', grid=True)
-    ax = test.plot(x='date', y='pre_y', style='r-', grid=True, ax=ax)
-    plt.show()
+    trace1 = go.Scatter(
+        x = test['date'],
+        y = test['adj_close'],
+        mode='lines',
+        name = 'Previous'
+    )
 
-    # rmse=math.sqrt(mean_squared_error(y_sample, test['pre_y']))
-    # print("RMSE on dev set = %0.3f" % rmse)
-    # mape = get_mape(y_sample, test['pre_y'])
-    # print("MAPE on dev set = %0.3f%%" % mape)
+    trace2 = go.Scatter(
+        x = test['date'],
+        y = test['pre_y'],
+        mode='lines',
+        name = 'Forecast'
+    )
 
-    # imp = list(zip(train[features], gs.best_estimator_.feature_importances_))
-    # imp.sort(key=lambda tup: tup[1])
-    # for i in range(-1,-10,-1):
-    #     print(imp[i])
+    fig = go.Figure(data=[trace1, trace2], layout=layout)
+    #print('XG',fig)
+
+    return fig

@@ -24,16 +24,7 @@ import plotly.graph_objects as go
 import time 
 
 def predict(numPrediction, model, closeData, lookBack):
-    """
-    This function predicts the next values for 14 days (numPrediction = 14). 
-    Args: 
-        numPrediction: int 
-        model: keras.model 
-        closeData: list
-        lookBack: int 
-    Returns: 
-        predictionList: list 
-    """
+
     # Initialize the prediction list from before the look back value 
     predictionList = closeData[-lookBack:]
     
@@ -54,14 +45,7 @@ def predict(numPrediction, model, closeData, lookBack):
     return predictionList
     
 def predictDates(numPrediction, df):
-    """
-    This function is used to create a list of the dates that the data is predicted for. 
-    Args: 
-        numPrediction: int 
-        df: pandas dataframe 
-    Returns: 
-        predictionDates: list 
-    """
+    
     # The intial date for the prediction is the one from the date 
     lastDate = df['Date'].values[-1]
     # The prediction dates are computed by making a date range from the last date of the training set to the number of dates to predicts and then coverting to a list. 
@@ -71,24 +55,16 @@ def predictDates(numPrediction, df):
 
 
 def LSTMAlgorithm(ticker,time_frame):
-    """
-    This function contains the code for the Long Short Term Memory Algorithm. 
-    Args: 
-        ticker: str
-    Returns: 
-        fig: go.Figure
-    """
-
+    
     # Get the current time in UNIX
     currentUnixTime = int(time.time())
     print(currentUnixTime)
     # Read the historical data from Yahoo finance with the unix timestamps with a difference of 2Y. 
     df = pd.read_csv(f'https://query1.finance.yahoo.com/v7/finance/download/{ticker}?period1={currentUnixTime - 63072000}&period2={currentUnixTime}&interval={time_frame}&events=history&includeAdjustedClose=true')
 
-    print(df)
     # Convert the values in date column to datetime objects for easier use. 
     df['Date'] = pd.to_datetime(df['Date'])
-    #df.set_axis(df['Date'], inplace=True)
+
     # Remove the colomns for the open, high, low, and volume because they are not needed. 
     df.drop(columns=['Open', 'High', 'Low', 'Volume'], inplace=True)
 
@@ -111,7 +87,7 @@ def LSTMAlgorithm(ticker,time_frame):
     closeTest = closeData[split:]
 
     # Numbers of days in the past used to forecast the next price.  
-    lookBack = 60
+    lookBack = 30
 
     # Time series are data sets that track samples over time and allow one to see the factors influencing certain data over time. 
     # Generate batches of data from the training and test data while using the 15 day look back. The batch_size represents the number of samples that will be proccessed through the network before being assigned a weight (or importance for the prediction) 
@@ -125,11 +101,10 @@ def LSTMAlgorithm(ticker,time_frame):
     # Add a dense layer which is basically the layer that takes in inputs and outputs the forecasting 
     model.add(Dense(1))
     # Compile the model using the adam optimizer and mean square error to manage data loss. These algorithms use complex mathematics and is the reason why the library is used. 
-    model.compile(optimizer='adam', loss='mse')
+    model.compile(optimizer='adam', loss='mse',metrics=['accuracy'])
 
     # Train the network using the training timeseries generator with 200 passes through the set to maximize accuracy without slowing the program down too much. 
     model.fit_generator(trainGenerator, epochs=200, verbose=1)
-
     # Predict the data for the test set for comparison. 
     prediction = model.predict_generator(testGenerator)
 
@@ -139,17 +114,21 @@ def LSTMAlgorithm(ticker,time_frame):
     prediction = prediction.reshape((-1))
     closeData = closeData.reshape((-1))
 
+    print("train:",closeTrain)
+    print("test:",closeTest)
     # Create the layout for the graph 
     layout = go.Layout(
-        title = "Prediction",
+        title = "LSTM Prediction",
         xaxis = {'title' : "Date"},
-        yaxis = {'title' : "Close"}
+        yaxis = {'title' : "Close"},
     )
 
     # Get the list of the forecast data
-    forecast = predict(30, model, closeData, lookBack)
+    forecast = predict(15, model, closeData, lookBack)
+
+    train = predict(15, model, closeTrain, lookBack)
     # Get the list of the forecast dates 
-    forecastDates = predictDates(30, df)
+    forecastDates = predictDates(15, df)
 
     # Make a scatter plot of the forecast values and dates
     trace1 = go.Scatter(
@@ -167,8 +146,16 @@ def LSTMAlgorithm(ticker,time_frame):
         name = 'Previous'
     )
 
-    # Generate the figure to display them together
-    fig = go.Figure(data=[trace2, trace1], layout=layout)
+    trace3 = go.Scatter(
+        x = forecastDates,
+        y = train,
+        mode='lines',
+        name = 'Train'
+    )
 
+
+    # Generate the figure to display them together
+    fig = go.Figure(data=[trace2,trace1], layout=layout)
+    #print('LSTM',fig)
     # Return the figure 
     return fig 

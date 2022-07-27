@@ -28,7 +28,7 @@ from pages.funcs import fetch
 
 # Import the LSTM algorithm 
 from LSTM.LSTM import LSTMAlgorithm
-
+from XGBoost.XGBoot import XGBoostAl
 # Importing the data management library to read CSV 
 import pandas as pd
 
@@ -84,10 +84,11 @@ def output_text(value):
     try: 
         # Getting information about the graph, fullname, details (open, high, low, etc) using the functions we created in fetch.py
         fig, fullname, info = fetch.searchData(str(value).upper(),'1d')
-        print(fig, fullname, info)
+        #print(fig, fullname, info)
         # Getting the graph of the future of the stock using machine learning
         predictionFigure = LSTMAlgorithm(str(value).upper(),'1d')
-        print(predictionFigure)
+        XGBoostFigure = XGBoostAl(str(value).upper(),'1d')
+        #print(predictionFigure)
         # Creating the dbc component showing the graph and information of the stock that will go into the page
         stockInfo = dbc.Row([
                 # This is formatted using columns. One for the graph and another for the information.
@@ -147,7 +148,11 @@ def output_text(value):
             ),
             html.Div(
                 dcc.Graph(figure = predictionFigure)
-            )]
+            ),
+            html.Div(
+                dcc.Graph(figure = XGBoostFigure)
+            )
+            ]
     # If the user inputted an invalid stock name, then the except statement will return an error message.
     except: 
         if value is not None:

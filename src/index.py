@@ -22,12 +22,6 @@ dropdown = dbc.DropdownMenu(
     # Pages included in the dropdown
     children=[
         # About page with link being localhost/about
-        dbc.DropdownMenuItem("About", href="/about"),
-        # Portfolio page with link being localhost/portfolio
-        dbc.DropdownMenuItem("My Portfolio", href="/portfolio"),
-        # Watchlist page with link being localhost/watchlist
-        dbc.DropdownMenuItem("My Watchlist", href="/watchlist"),
-        # Search page with link being localhost/search
         dbc.DropdownMenuItem("Search", href="/search")
     ],
     # Enable the navbar
