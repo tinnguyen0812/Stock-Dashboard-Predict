@@ -1,15 +1,10 @@
-"""
-ICS3U
-Eric Sui
-This file contains the code for global layouts and components that are meant to be displayed on every page (ie. navbar). 
-"""
 
 # Import the libraries needed to render the web app
 from dash import Input, Output, State, html, dcc
 import dash_bootstrap_components as dbc
 
 # Import the various python files that contain the layouts
-from pages import about, portfolio, watchlist, home, search
+from pages import portfolio, watchlist, home, search
 
 # Import the app instance for callbacks
 from app import app
@@ -21,8 +16,9 @@ nav_item = dbc.NavItem(dbc.NavLink("Home", href="/home"))
 dropdown = dbc.DropdownMenu(
     # Pages included in the dropdown
     children=[
-        # About page with link being localhost/about
-        dbc.DropdownMenuItem("Search", href="/search")
+        dbc.DropdownMenuItem("Search", href="/search"),
+        dbc.DropdownMenuItem("Watchlist", href="/watchlist"),
+        dbc.DropdownMenuItem("Portfolio", href="/portfolio")
     ],
     # Enable the navbar
     nav=True,
@@ -37,7 +33,7 @@ navbar = dbc.Navbar(
     dbc.Container(
         [
             # Name of the project at the top left
-            dbc.NavbarBrand("Machine Learning Stock Database"),
+            dbc.NavbarBrand("STOCK PREDICT AND STORE"),
             # Needed for callbacks to identify whether the navbar is being clicked on
             dbc.NavbarToggler(id="navbar-toggler"),
             # Collapse or expand the dropdown
@@ -56,13 +52,7 @@ navbar = dbc.Navbar(
 
 
 def toggle_navbar_collapse(n, is_open):
-    """
-    This function toggles the boolean for whether the navbar is open. 
-    Args: 
-        n: int
-    Returns: 
-        is_open: bool 
-    """
+
     # n is the number of times the navbar has been clicked; if it is not 0, the navbar is not open
     if n:
         return not is_open
@@ -91,19 +81,10 @@ app.layout = html.Div([
     [Input('url', 'pathname')])
 
 def displayPage(newpath):
-    """
-    This function returns the content of the desired page.
-    Args:
-        newpath: string
-    Returns: 
-        layout: content of page in HTML div component 
-    """
+
     # Returns the layout variable from the other files depending on the url
     # If none of the specific pages are selected, it displays the home page layout
-    if newpath == '/about':
-        return about.layout
-
-    elif newpath == '/portfolio':
+    if newpath == '/portfolio':
         return portfolio.layout
 
     elif newpath == '/watchlist':

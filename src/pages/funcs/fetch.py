@@ -1,8 +1,3 @@
-"""
-ICS3U 
-Muhammad Wasif Kamran
-This file contains various functions that are used elsewhere in the project to webscrape data from Yahoo Finance. 
-"""
 
 # Import the Plotly libraries needed for core components and graphing
 from dash import dcc
@@ -57,13 +52,7 @@ def currentPriceParser(soup):
     return currentPriceVal
 
 def watchlistFetchData(ticker):
-    """
-    This function fetches data for the watchlist table using webscraping from Yahoo Finance 
-    Args: 
-        ticker: string 
-    Returns: 
-        [currentPriceVal, open, high, low, fiftyTwoWeekHigh, fiftyTwoWeekLow]: list
-    """
+    
     # Variable to hold the link to be webscraped 
     URL = f'https://finance.yahoo.com/quote/{ticker}'
     
@@ -103,13 +92,7 @@ def watchlistFetchData(ticker):
     return [currentPriceVal, open, high, low, fiftyTwoWeekHigh, fiftyTwoWeekLow]
 
 def portfolioFetchData(ticker):
-    """
-    This function takes in a ticker and returns the current price of a stock to be used in the portfolio. While the code is similar to the watchlist code, it is better to compartmentalize and seperate the two in case we are going to be parsing other information in the future and need to add it to this function. 
-    Args:
-        ticker : string
-    Returns:
-        currentPriceVal : string
-    """
+    
     # Store the link that will be scraped using an fstring
     URL = f'https://finance.yahoo.com/quote/{ticker}/'
 
@@ -124,14 +107,7 @@ def portfolioFetchData(ticker):
     return currentPriceVal
 
 def homePage(ticker):
-    """
-    This function returns the data needed for the home page. 
-    Args: 
-        ticker : string
-    Returns:
-        fig : plotly.graph_objects object
-        [currentPriceVal, open, close, high, low, fiftyTwoWeekHigh, fiftyTwoWeekLow] : list
-    """
+    
     currentUnixTime = int(time.time())
     # We found out that Yahoo Finance generates its historical data CSV using a link that uses UNIX timestamps
     # We took the sample URL for a random stock and modified it as necessary 
@@ -185,6 +161,7 @@ def homePage(ticker):
     dayRange = dayRange.split(" - ")
     # Replace the commas with empty strings so that converting to float is possible 
     low, high = float(dayRange[0].replace(',','')), float(dayRange[1].replace(',',''))
+
     # The 52W data is the data at the 4th index in the stats table 
     fiftyTwoWeekRange = statsTable[4]
     # Parse the data from the string in the stats table 
@@ -198,17 +175,10 @@ def homePage(ticker):
     return fig, [currentPriceVal, open, close, high, low, fiftyTwoWeekHigh, fiftyTwoWeekLow]
 
 def searchData(ticker,time_frame):
-    """
-    This function returns the data needed for the search page
-    Args: 
-        ticker : string
-    Returns:
-        dcc.Graph(figure=fig, config=config) : dash object 
-        fullName : string
-        [currentPriceVal, open, high, low, fiftyTwoWeekHigh, fiftyTwoWeekLow] : list
-    """
+    
+    currentUnixTime = int(time.time())
     # Read the data from the CSV using UNIX timestamps 
-    df = pd.read_csv(f'https://query1.finance.yahoo.com/v7/finance/download/{str(ticker).upper()}?period1={int(time.time()-7689600)}&period2={int(time.time())}&interval={time_frame}&events=history&includeAdjustedClose=true')
+    df = pd.read_csv(f'https://query1.finance.yahoo.com/v7/finance/download/{ticker}?period1={currentUnixTime - 63072000}&period2={currentUnixTime}&interval=1d&events=history&includeAdjustedClose=true')
     
     # For aesthetic purposes, make sure the mode bar on the graph is always displayed 
     config = {'displayModeBar': True}

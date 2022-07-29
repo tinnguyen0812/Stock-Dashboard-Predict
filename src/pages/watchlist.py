@@ -1,8 +1,3 @@
-"""
-ICS3U 
-Muhammad Wasif Kamran 
-This file contains the code to display the watchlist page. 
-"""
 
 # Import json library to access JSON file 
 import json
@@ -18,13 +13,7 @@ from pages.funcs import fetch
 from app import app
 
 def formtable():
-    """
-    This function generates the content for the table. 
-    Args: 
-        None 
-    Returns: 
-        table: dbc.Table 
-    """
+    
     # Read the JSON file to get the tickers to display
     with open("pages/watchlist.json") as jsonFile:
         jsonObject = json.load(jsonFile)
@@ -170,13 +159,7 @@ layout = html.Div(children=[
     Input('refresh-button', 'n_clicks')
 )
 def refreshTable(n):
-    """
-    This function generates the table. 
-    Args: 
-        None 
-    Returns: 
-        [table]: list
-    """
+    
     # Generate the table 
     table = formtable()
     # Return it in a list as the children parameter of the body-table takes lists  
@@ -190,15 +173,7 @@ def refreshTable(n):
     [State('remove-popup-watchlist', 'is_open')]
 )
 def removePopup(removeClicks, submitClicks, is_open):
-    """
-    This function closes the popup when the user submits or closes the modal. 
-    Args: 
-        removeClicks: int
-        submitClicks: int 
-        is_open: bool
-    Returns: 
-        is_open: bool
-    """
+    
     # If the remove button or the submit button has been clicked, change the state of the modal to not open 
     if removeClicks or submitClicks:
         return not is_open
@@ -215,14 +190,7 @@ lastRemoved = ""
     ]
 )
 def removeWatchlistStock(clicks, ticker):
-    """
-    This function removes a stock from the watchlist from user input and gives a confirmation notification.
-    Args: 
-        clicks: int 
-        ticker: str 
-    Returns: 
-        [dbc.Toast]: list
-    """
+    
     # Make sure that the button has actually been clicked, otherwise the function will fire on page load 
     if clicks is not None: 
         # Open the JSON and store the data in list 

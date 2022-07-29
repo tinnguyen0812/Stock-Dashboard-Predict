@@ -1,8 +1,3 @@
-"""
-ICS3U 
-Muhammad Wasif Kamran
-This file stores the configuration code for the app. 
-"""
 
 # Import the libraries used to generate the website along with bootstrap components
 import dash

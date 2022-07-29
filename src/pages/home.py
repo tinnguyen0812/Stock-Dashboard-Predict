@@ -1,8 +1,3 @@
-"""
-ICS3U 
-Eric Sui
-This file contains the code for the layout of the home page
-"""
 
 # Import dash libraries for components
 from dash import html, dcc

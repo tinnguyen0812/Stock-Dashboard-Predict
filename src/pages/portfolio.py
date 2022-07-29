@@ -1,8 +1,4 @@
-"""
-ICS3U 
-Muhammad Wasif Kamran & Eric Sui
-This file contains the code for the layout of the portfolio page. This file was considerably larger than the others and was thus a joint effort. Most of the code was written by Eric and the code written by Wasif is marked in the docstrings with "Written by Wasif."
-"""
+
 # Importing the needed libraries
 import json
 from dash import html, Output, Input, State, dcc
@@ -18,13 +14,7 @@ colors = {
 }
 
 def calculateValue():
-    """
-    Finds the total value of the portfolio
-    Args:
-        None
-    Returns:
-        total: int
-    """
+    
     # Open the json file
     with open("pages/portfolioStocks.json") as jsonFile:
         jsonObject = json.load(jsonFile)
@@ -46,13 +36,7 @@ def calculateValue():
 
 
 def formtable():
-    """
-    This function creates a table that displays the portfolio
-    Args:
-        None
-    Returns:
-        table: html.Table
-    """
+    
     # Open the json file
     with open("pages/portfolioStocks.json") as jsonFile:
         jsonObject = json.load(jsonFile)
@@ -123,15 +107,7 @@ def formtable():
     return table 
 
 def formPieChartVolume():
-    """
-    This function creates a pie chart displaying information about the volumes of the stocks in portfolioStocks
-    Args:
-        None
-    Returns:
-        volumePieGraph: go.Figure
     
-    Written by Wasif. 
-    """
     # Opening the json file containing the portfolio info
     with open("pages/portfolioStocks.json") as jsonFile:
         jsonObject = json.load(jsonFile)
@@ -153,15 +129,7 @@ def formPieChartVolume():
     return volumePieGraph 
 
 def formPieChartValue():
-    """
-    This function creates a pie graph displaying information about the monetary values of the stocks in portfolioStocks
-    Args:
-        None
-    Returns:
-        valuePieGraph: go.Figure
     
-    Written by Wasif. 
-    """
     # Opening the json file
     with open("pages/portfolioStocks.json") as jsonFile:
         jsonObject = json.load(jsonFile)
@@ -184,15 +152,7 @@ def formPieChartValue():
     return valuePieGraph 
 
 def formbarchart():
-    """
-    This function creates a pie graph displaying information about the industries of the stocks in portfolioStocks
-    Args:
-        None
-    Returns:
-        industryBarGraph: go.Figure
     
-    Written by Wasif. 
-    """
     # Opening the json file
     with open("pages/portfolioStocks.json") as jsonFile:
         jsonObject = json.load(jsonFile)
@@ -367,15 +327,7 @@ layout = html.Div(children = [
     [State('remove-popup-portfolio', 'is_open')]
 )
 def removePopup(removeClicks, submitClicks, is_open):
-    """
-    Toggles the remove stock modal
-    Args:
-        removeClicks: int
-        submitClicks: int
-        is_open: bool
-    Returns:
-        not is_open: bool
-    """
+    
     # If one of the click numbers are greater than 0 when the callback fires (this is necessary because all the callback)
     if removeClicks or submitClicks:
         return not is_open
@@ -391,15 +343,7 @@ def removePopup(removeClicks, submitClicks, is_open):
 )
 # This function removes the stock from the portfolio
 def removePortfolioStock(clicks, ticker, removedNum):
-    """
-    Removes the specified amount of the inputted stock from the portfolio
-    Args:
-        click: int
-        ticker: str
-        removedNum: float
-    Returns:
-        dbc.Toast 
-    """
+    
     # These if statements check that the user actually inputed a volume and that it's positive.
     if removedNum is not None:
         if int(removedNum) <= 0:
@@ -532,13 +476,7 @@ def removePortfolioStock(clicks, ticker, removedNum):
     [Input('refresh-button2', 'n_clicks')]
 )
 def refreshValue(n_clicks):
-    """
-    Refreshes the number displaying the value of the portfolio.
-    Args:
-        n_clicks: int
-    Returns:
-        portfolioValue: str
-    """
+    
     # The function checks if the user has clicked at least once. If so, they it creates a pie graph and returns it into the div.
     if n_clicks is not None: 
         portfolioValue = str(calculateValue())
@@ -550,13 +488,7 @@ def refreshValue(n_clicks):
     [Input('refresh-button2', 'n_clicks')]
 )
 def refreshTable(n_clicks):
-    """
-    Refreshes the table for the portfolio.
-    Args:
-        n_clicks: int
-    Returns:
-        [table]: html.Table in a 1-element list
-    """
+    
     # The function checks if the user has clicked at least once. If so, they it creates a table and returns it into the div.
     if n_clicks is not None:
         table = formtable()
@@ -568,15 +500,7 @@ def refreshTable(n_clicks):
     [Input('refresh-button2', 'n_clicks')]
 )
 def refreshVolumePie(n_clicks):
-    """
-    Refreshes the volume pie graph.
-    Args:
-        n_clicks: int
-    Returns:
-        fig: go.Figure
     
-    Written by Wasif. 
-    """
     # The function checks if the user has clicked at least once. If so, they it creates a pie graph and returns it into the div.
     if n_clicks is not None: 
         fig = formPieChartVolume()
@@ -588,15 +512,7 @@ def refreshVolumePie(n_clicks):
     [Input('refresh-button2', 'n_clicks')]
 )
 def refreshValuePie(n_clicks):
-    """
-    Refreshes the value pie graph.
-    Args:
-        n_clicks: int
-    Returns:
-        fig: go.Figure
     
-    Written by Wasif. 
-    """
     # The function checks if the user has clicked at least once. If so, they it creates a pie graph and returns it into the div.
     if n_clicks is not None: 
         fig = formPieChartValue()
@@ -608,15 +524,7 @@ def refreshValuePie(n_clicks):
     [Input('refresh-button2', 'n_clicks')]
 )
 def refreshIndustryBar(n_clicks):
-    """
-    Refreshes the industry pie graph.
-    Args:
-        n_clicks: int
-    Returns:
-        fig: go.Figure
     
-    Written by Wasif. 
-    """
     # The function checks if the user has clicked at least once. If so, they it creates a bar graph and returns it into the div.
     if n_clicks is not None: 
         fig = formbarchart()

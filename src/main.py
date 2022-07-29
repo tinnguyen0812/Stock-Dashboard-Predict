@@ -1,8 +1,3 @@
-"""
-ICS3U 
-Muhammad Wasif Kamran
-This file contains the code that runs in terminal at the start of the programming if the user is new. 
-"""
 
 # Import json library to access JSON files
 import json

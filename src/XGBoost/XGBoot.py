@@ -1,8 +1,6 @@
 import math
-import matplotlib
 import numpy as np
 import pandas  as pd
-import seaborn as sns
 import time
 from datetime import date
 from matplotlib import pyplot as plt
@@ -29,7 +27,7 @@ def _load_data(ticker,time_frame):
 
     stk_path = "./VTI.csv"
     currentUnixTime = int(time.time())
-    df = pd.read_csv(f'https://query1.finance.yahoo.com/v7/finance/download/{ticker}?period1={currentUnixTime - 63072000}&period2={currentUnixTime}&interval={time_frame}&events=history&includeAdjustedClose=true')
+    df = pd.read_csv(f'https://query1.finance.yahoo.com/v7/finance/download/{ticker}?period1={1532719575}&period2={currentUnixTime}&interval={time_frame}&events=history&includeAdjustedClose=true')
     print('data',df)
     # Convert Date column to datetime
     df.loc[:, 'Date'] = pd.to_datetime(df['Date'], format='%Y-%m-%d')
@@ -59,15 +57,7 @@ def feature_engineer(df):
     return df[N:]
 
 def scale_row(row, feat_mean, feat_std):
-    """
-    Given a pandas series in row, scale it to have 0 mean and var 1 using feat_mean and feat_std
-    Inputs
-        row      : pandas series. Need to scale this.
-        feat_mean: mean
-        feat_std : standard deviation
-    Outputs
-        row_scaled : pandas series with same length as row, but scaled
-    """
+
     # If feat_std = 0 (this happens if adj_adj doesn't change over N days),
     # set it to a small number to avoid division by zero
     feat_std = 0.001 if feat_std == 0 else feat_std
@@ -76,15 +66,7 @@ def scale_row(row, feat_mean, feat_std):
     return row_scaled
 
 def get_mov_avg_std(df, col, N):
-    """
-    Given a dataframe, get mean and std dev at timestep t using values from t-1, t-2, ..., t-N.
-    Inputs
-        df         : dataframe. Can be of any length.
-        col        : name of the column you want to calculate mean and std dev
-        N          : get mean and std dev at timestep t using values from t-1, t-2, ..., t-N
-    Outputs
-        df_out     : same as df but with additional column containing mean and std dev
-    """
+ 
     mean_list = df[col].rolling(window=N, min_periods=1).mean()  # len(mean_list) = len(df)
     std_list = df[col].rolling(window=N, min_periods=1).std()  # first value will be NaN, because normalized by N-1
 

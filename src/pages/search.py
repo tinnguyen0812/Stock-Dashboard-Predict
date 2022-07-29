@@ -1,8 +1,3 @@
-"""
-ICS3U 
-Muhammad Wasif Kamran & Eric Sui 
-This file contains the code needed for the search page and its functionalities. This was also a very complex page and was a joint effort. Most of the code was written by Wasif and the code written by Eric has been explicitly mentioned with "Written by Eric."
-"""
 
 # Importing json to manage storage in JSON files 
 import json
@@ -69,17 +64,7 @@ tickerName = []
     [Input("input", "value")]
 )
 def output_text(value):
-    """
-    This function is used to generate the content for the page after a stock ticker name has been entered.
-    Args:
-        value: string
-    Returns:
-        if code runs properly:
-            buttons: Div
-            Div of returnChild
-        otherwise: 
-            dbc.Toast
-    """
+    
     # The try here is in case the fetcher does not find a stock with a matching ticker name that was inputted by the user. If so, it goes to the except.
     try: 
         # Getting information about the graph, fullname, details (open, high, low, etc) using the functions we created in fetch.py
@@ -106,41 +91,42 @@ def output_text(value):
             ])
         
         # Creating the add to watchlist and portfolio buttons
-        # buttons = html.Div(
-        #     [
-        #         # The buttons for adding to watchlist and portfolio
-        #         dbc.Button("Watchlist +", color="warning", disabled=False, id='watchlist-add'),
-        #         dbc.Button("Portfolio +", color="danger", disabled=False, id='portfolio-add'),
-        #         # The modal popup where the user adds a stock to portfolio
-        #         dbc.Modal(
-        #             [
-        #                 # The parts of the modal
-        #                 dbc.ModalHeader(dbc.ModalTitle("Add to Portfolio"), close_button=True),
-        #                 dbc.ModalBody([
-        #                     dbc.Input(id="volume-input", placeholder="Number of Shares Bought", type="text", debounce = True), 
-        #                     dbc.Input(id="buy-date", placeholder="Date Bought (DD/MM/YYYY)", type="text", debounce = True),
-        #                 ], id = "modalbody"),
-        #                 dbc.ModalFooter(
-        #                     dbc.Button(
-        #                         "Submit",
-        #                         id="submit-button",
-        #                         className="ms-auto",
-        #                         n_clicks=0,
-        #                     )
-        #                 ),
-        #             ],
-        #             # Giving an id to the modal and formatting it. We also set it's default state to false.
-        #             id="portfolio-popup",
-        #             centered = True,
-        #             is_open = False,
-        #         ),
-        #     # The bootstrap styling (here, we used bootstrap instead of css since we wanted to learn it)
-        #     ], className="d-grid gap-2 col-6 mx-auto"
-        # )
-        # Putting the current stocks ticker into the stack where it will be used later for adding to portfolio and watchlist. We can easily retrieve the most recent ticker name searched because we're using a stack. We keep the old ticker names searched in case we wanted to implement a back system.
+        buttons = html.Div(
+            [
+                # The buttons for adding to watchlist and portfolio
+                dbc.Button("Watchlist +", color="warning", disabled=False, id='watchlist-add'),
+                dbc.Button("Portfolio +", color="danger", disabled=False, id='portfolio-add'),
+                #The modal popup where the user adds a stock to portfolio
+                dbc.Modal(
+                    [
+                        #The parts of the modal
+                        dbc.ModalHeader(dbc.ModalTitle("Add to Portfolio"), close_button=True),
+                        dbc.ModalBody([
+                            dbc.Input(id="volume-input", placeholder="Number of Shares Bought", type="text", debounce = True), 
+                            dbc.Input(id="buy-date", placeholder="Date Bought (DD/MM/YYYY)", type="text", debounce = True),
+                        ], id = "modalbody"),
+                        dbc.ModalFooter(
+                            dbc.Button(
+                                "Submit",
+                                id="submit-button",
+                                className="ms-auto",
+                                n_clicks=0,
+                            )
+                        ),
+                    ],
+                    #Giving an id to the modal and formatting it. We also set it's default state to false.
+                    id="portfolio-popup",
+                    centered = True,
+                    is_open = False,
+                ),
+            #The bootstrap styling (here, we used bootstrap instead of css since we wanted to learn it)
+            ], className="d-grid gap-2 col-6 mx-auto"
+        )
+        #Putting the current stocks ticker into the stack where it will be used later for adding to portfolio and watchlist. We can easily retrieve the most recent ticker name searched because we're using a stack. We keep the old ticker names searched in case we wanted to implement a back system.
         tickerName.append(value.upper())
         # Returning the layout we created in this function (the buttons, the stock info, and the machine learning prediction).
         return [
+            buttons,
             html.Div(
                 [stockInfo], 
                 id='layout-output', 
@@ -177,15 +163,7 @@ def output_text(value):
     [State("portfolio-popup", "is_open")],
 )
 def toggle_modal(portfolioClicks, submitClicks, is_open):
-    """
-    Toggles whether the portfolio-popup modal is open or not 
-    Args:
-        portfolioClicks: int
-        submitClicks: int
-        is_open: bool
-    Returns:
-        not is_open: bool
-    """
+    
     # Toggle the state of modal's open variable if it has been clicked. 
     if portfolioClicks or submitClicks:
         return not is_open
@@ -215,7 +193,7 @@ def updatePortfolio(clicks, volumeValue, buyDate):
             volumeValue = float(volumeValue)
             # Take the date input and split it at the slashes 
             dates = str(buyDate).split('/')
-            
+            print(dates)
             # There must be three elements in the dates list: year, month, and day 
             # Month and day must be 2 characters long and year must be 4 
             if len(dates) == 3 and len(dates[0]) == 2 and len(dates[1]) == 2 and len(dates[2]) == 4:
@@ -230,7 +208,7 @@ def updatePortfolio(clicks, volumeValue, buyDate):
 
                     # Get the UNIX time for when the user bought the stocks 
                     pastUnixTime = time.mktime(datetime.date(buyYear, buyMonth, buyDay).timetuple()) 
-                    
+                    print(pastUnixTime,currentUnixTime)
                     # Make sure that the past UNIX time is greater than the current UNIX time otherwise give the error toast
                     if int(pastUnixTime) > int(currentUnixTime):
                         return [dbc.Toast(
@@ -372,15 +350,7 @@ def updatePortfolio(clicks, volumeValue, buyDate):
     [Input('watchlist-add', 'n_clicks')]
 )
 def updateWatchlist(n):
-    """
-    Updates the watchlist when the user clicks the button
-    Args:
-        n: int
-    Returns:
-        dbc.Toast
     
-    Written by Eric. 
-    """
     # Make sure that the user has actually inputted something and the function is not getting fired at page load 
     if n is not None:
         with open("pages/watchlist.json") as jsonFile:
