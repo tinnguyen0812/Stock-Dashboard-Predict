@@ -237,3 +237,49 @@ def removeWatchlistStock(clicks, ticker):
                 is_open=True,
                 style={"position": "fixed", "top": 66, "right": 10, "width": 350},
             )]
+
+def updateWatchlist
+    # Open the JSON and store the data in list 
+    with open("pages/watchlist.json") as jsonFile:
+        jsonObject = json.load(jsonFile)
+        jsonFile.close()
+    watchlistStocks = jsonObject["watchlistStocks"]
+    
+    # Error handling to make sure that the inputted ticker is actually in the list 
+    try: 
+        # This code runs if the ticker exists in list
+        # Remove the ticker from the list 
+        watchlistStocks.remove(ticker)
+
+        # Create a dictionary with the updates list 
+        jsonObject = {'watchlistStocks': watchlistStocks}
+        # Open the JSON and dump the new information in 
+        with open('pages/watchlist.json', 'w') as jsonFile: 
+            json.dump(jsonObject, jsonFile)
+            jsonFile.close()
+        
+        # Update the last removed ticker
+        lastRemoved = ticker
+        # Return a success toast notificiation 
+        return [dbc.Toast(
+            id="success-toast",
+            icon="success",
+            header=f"Success! Removed from your watchlist.",
+            duration=2750,
+            is_open=True,
+            style={"position": "fixed", "top": 66, "right": 10, "width": 350},
+        )]
+    except:
+        # This code runs if the ticker is not in list 
+        # Making sure the user actually inputted a ticker and not empty and that they actually clicked the button as opposed to page load 
+        # Make sure that the call back is not firing again unexpectedly (through the last removed condition)
+        if ticker is not None and clicks is not None and lastRemoved != ticker: 
+            # Return an error toast 
+            return [dbc.Toast(
+            id="error-toast",
+            icon="danger",
+            header=f"Invalid ticker name. Try Again.",
+            duration=2750,
+            is_open=True,
+            style={"position": "fixed", "top": 66, "right": 10, "width": 350},
+        )]

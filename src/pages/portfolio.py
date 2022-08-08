@@ -529,3 +529,26 @@ def refreshIndustryBar(n_clicks):
     if n_clicks is not None: 
         fig = formbarchart()
         return fig
+
+def calculateValue():
+    # This function calculates the value of the portfolio.
+    with open('pages/portfolioStocks.json', 'r') as jsonFile:
+        portfolioStocks = json.load(jsonFile)['portfolioStocks']
+        jsonFile.close()
+    value = 0
+    for i in range(len(portfolioStocks)):
+        value += portfolioStocks[i][1] * portfolioStocks[i][2]
+    return value
+
+def formtable():
+    # This function creates a table of the portfolio stocks.
+    with open('pages/portfolioStocks.json', 'r') as jsonFile:
+        portfolioStocks = json.load(jsonFile)['portfolioStocks']
+        jsonFile.close()
+    table = html.Table(
+        # This is the header of the table.
+        [html.Tr([html.Th("Ticker"), html.Th("Volume"), html.Th("Value")])] +
+        # This is the body of the table.
+        [html.Tr([html.Td(portfolioStocks[i][0]), html.Td(portfolioStocks[i][1]), html.Td(portfolioStocks[i][2])]) for i in range(len(portfolioStocks))]
+    )
+    return table
