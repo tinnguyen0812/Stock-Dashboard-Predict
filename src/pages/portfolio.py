@@ -1,4 +1,3 @@
-
 import json
 from dash import html, Output, Input, State, dcc
 from pages.funcs import fetch
@@ -56,7 +55,6 @@ def formtable():
         dateBought = currentStock[2]
         totalBalance += currentPrice*volume
         totalProfit += profit
-
         rows.append(html.Tr([
             html.Td(ticker),
             html.Td(f"{currentPrice}$"),
@@ -65,7 +63,6 @@ def formtable():
             html.Td(f"{profit}$"),
             html.Td(dateBought)
         ]))
-
     table_body = [html.Tbody(rows)]
     table = dbc.Table(table_header + table_body, striped = True, hover = True, id="tabletable")
     return table 
@@ -81,6 +78,7 @@ def formPieChartVolume():
     for i in range(0, len(portfolioStocks)):
         labels.append(portfolioStocks[i][0]) 
         values.append(portfolioStocks[i][1])
+
     volumePieGraph = go.Figure(data=[go.Pie(labels=labels, values=values, hole=.5, title = 'Volume Composition')])
     return volumePieGraph 
 
@@ -88,6 +86,7 @@ def formPieChartValue():
     with open("pages/portfolioStocks.json") as jsonFile:
         jsonObject = json.load(jsonFile)
         jsonFile.close()
+
     portfolioStocks = jsonObject["portfolioStocks"]
     labels = []
     values = []
@@ -105,6 +104,7 @@ def formbarchart():
 
     portfolioStocks = jsonObject["portfolioStocks"]
     industryCounts = {}
+
     x = []; y = []
     for i in range(0, len(portfolioStocks)):
         if len(portfolioStocks[i]) == 5:
@@ -114,10 +114,8 @@ def formbarchart():
                 industryCounts[portfolioStocks[i][4]] += portfolioStocks[i][1]
     for i in industryCounts.keys():
         x.append(i); y.append(industryCounts[i])
-
     industryBarGraph = go.Figure([go.Bar(x=x, y=y)])
     return industryBarGraph
-
 
 layout = html.Div(children = [
     html.H1(
@@ -153,7 +151,6 @@ layout = html.Div(children = [
             'text-align': 'center'
         }
     ),
-
     html.Div(
         children = [
             dbc.Row(
@@ -340,7 +337,6 @@ def removePortfolioStock(clicks, ticker, removedNum):
                     is_open=True,
                     style={"position": "fixed", "top": 66, "right": 10, "width": 350},
                 )]
-
     except:
         if removedNum is not None:
             return [dbc.Toast(
@@ -361,6 +357,7 @@ def refreshValue(n_clicks):
         portfolioValue = str(calculateValue())
         return portfolioValue
 
+# The table refresh callback
 @app.callback(
     Output('body-table2', 'children'),
     [Input('refresh-button2', 'n_clicks')]
@@ -375,6 +372,7 @@ def refreshTable(n_clicks):
     [Input('refresh-button2', 'n_clicks')]
 )
 def refreshVolumePie(n_clicks):
+
     if n_clicks is not None: 
         fig = formPieChartVolume()
         return fig
@@ -384,6 +382,7 @@ def refreshVolumePie(n_clicks):
     [Input('refresh-button2', 'n_clicks')]
 )
 def refreshValuePie(n_clicks):
+    
     if n_clicks is not None: 
         fig = formPieChartValue()
         return fig
@@ -393,25 +392,7 @@ def refreshValuePie(n_clicks):
     [Input('refresh-button2', 'n_clicks')]
 )
 def refreshIndustryBar(n_clicks):
+
     if n_clicks is not None: 
         fig = formbarchart()
         return fig
-
-def calculateValue():
-    with open('pages/portfolioStocks.json', 'r') as jsonFile:
-        portfolioStocks = json.load(jsonFile)['portfolioStocks']
-        jsonFile.close()
-    value = 0
-    for i in range(len(portfolioStocks)):
-        value += portfolioStocks[i][1] * portfolioStocks[i][2]
-    return value
-
-def formtable():
-    with open('pages/portfolioStocks.json', 'r') as jsonFile:
-        portfolioStocks = json.load(jsonFile)['portfolioStocks']
-        jsonFile.close()
-    table = html.Table(
-        [html.Tr([html.Th("Ticker"), html.Th("Volume"), html.Th("Value")])] +
-        [html.Tr([html.Td(portfolioStocks[i][0]), html.Td(portfolioStocks[i][1]), html.Td(portfolioStocks[i][2])]) for i in range(len(portfolioStocks))]
-    )
-    return table

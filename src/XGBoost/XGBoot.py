@@ -11,8 +11,8 @@ from xgboost import XGBRegressor
 import plotly.graph_objects as go
 import datetime
 
-test_size = 0.2                # proportion of dataset to be used as test set
-N = 3                          # for feature at day t, we use lags from t-1, t-2, ..., t-N as features
+test_size = 0.2                
+N = 3                          
 
 model_seed = 100
 
@@ -24,30 +24,22 @@ def get_mape(y_true, y_pred):
     return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
 
 def _load_data(ticker,time_frame):
-
-    stk_path = "./VTI.csv"
     currentUnixTime = int(time.time())
+    print(currentUnixTime)
     df = pd.read_csv(f'https://query1.finance.yahoo.com/v7/finance/download/{ticker}?period1={1532719575}&period2={currentUnixTime}&interval={time_frame}&events=history&includeAdjustedClose=true')
     print('data',df)
-    # Convert Date column to datetime
     df.loc[:, 'Date'] = pd.to_datetime(df['Date'], format='%Y-%m-%d')
-    # Change all column headings to be lower case, and remove spacing
     df.columns = [str(x).lower().replace(' ', '_') for x in df.columns]
-    # Get month of each sample
     df['month'] = df['date'].dt.month
-    # Sort by datetime
     df.sort_values(by='date', inplace=True, ascending=True)
     print('data return',df)
     return df
 
 def feature_engineer(df):
-
     df['range_hl'] = df['high'] - df['low']
     df['range_oc'] = df['open'] - df['close']
-
     lag_cols = ['adj_close', 'range_hl', 'range_oc', 'volume']
     shift_range = [x + 1 for x in range(N)]
-
     for col in lag_cols:
         for i in shift_range:
 
@@ -63,7 +55,6 @@ def scale_row(row, feat_mean, feat_std):
     return row_scaled
 
 def get_mov_avg_std(df, col, N):
- 
     mean_list = df[col].rolling(window=N, min_periods=1).mean() 
     std_list = df[col].rolling(window=N, min_periods=1).std()  
 
@@ -77,7 +68,6 @@ def get_mov_avg_std(df, col, N):
     return df_out
 
 def XGBoostAl(ticker,time_frame):
-    
     data_df=_load_data(ticker,time_frame)   
     df=feature_engineer(data_df)
    

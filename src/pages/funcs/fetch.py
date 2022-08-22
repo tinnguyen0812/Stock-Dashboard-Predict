@@ -1,4 +1,4 @@
-
+import pandas as pd
 from dash import dcc
 import plotly.graph_objects as go
 import time 
