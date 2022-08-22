@@ -57,9 +57,6 @@ def feature_engineer(df):
     return df[N:]
 
 def scale_row(row, feat_mean, feat_std):
-
-    # If feat_std = 0 (this happens if adj_adj doesn't change over N days),
-    # set it to a small number to avoid division by zero
     feat_std = 0.001 if feat_std == 0 else feat_std
     row_scaled = (row - feat_mean) / feat_std
 
@@ -67,14 +64,12 @@ def scale_row(row, feat_mean, feat_std):
 
 def get_mov_avg_std(df, col, N):
  
-    mean_list = df[col].rolling(window=N, min_periods=1).mean()  # len(mean_list) = len(df)
-    std_list = df[col].rolling(window=N, min_periods=1).std()  # first value will be NaN, because normalized by N-1
+    mean_list = df[col].rolling(window=N, min_periods=1).mean() 
+    std_list = df[col].rolling(window=N, min_periods=1).std()  
 
-    # Add one timestep to the predictions 
     mean_list = np.concatenate((np.array([np.nan]), np.array(mean_list[:-1])))
     std_list = np.concatenate((np.array([np.nan]), np.array(std_list[:-1])))
 
-    # Append mean_list to df
     df_out = df.copy()
     df_out[col + '_mean'] = mean_list
     df_out[col + '_std'] = std_list
@@ -83,11 +78,8 @@ def get_mov_avg_std(df, col, N):
 
 def XGBoostAl(ticker,time_frame):
     
-    data_df=_load_data(ticker,time_frame)
-
-    
+    data_df=_load_data(ticker,time_frame)   
     df=feature_engineer(data_df)
-
    
     cols_list = [
         "adj_close",
@@ -117,7 +109,6 @@ def XGBoostAl(ticker,time_frame):
 
     scaler = StandardScaler()
     train_scaled = scaler.fit_transform(train[cols_to_scale])
-    # Convert the numpy array back into pandas dataframe
     train_scaled = pd.DataFrame(train_scaled, columns=cols_to_scale)
     train_scaled[['date', 'month']] = train.reset_index()[['date', 'month']]
 
@@ -150,12 +141,7 @@ def XGBoostAl(ticker,time_frame):
                 'max_depth':[7],
                 'learning_rate': [0.3],
                 'min_child_weight':range(5, 21, 1),
-                #'subsample':[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
-                #'gamma':[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
-                #'colsample_bytree':[0.5, 0.6, 0.7, 0.8, 0.9, 1],
-                #'colsample_bylevel':[0.5, 0.6, 0.7, 0.8, 0.9, 1]
                 }
-    #parameters={'max_depth':range(2,10,1)}
     model=XGBRegressor(seed=model_seed,
                          n_estimators=100,
                          max_depth=3,
@@ -177,7 +163,6 @@ def XGBoostAl(ticker,time_frame):
     pre_y_scaled = gs.predict(X_sample_scaled)
     test['pre_y_scaled'] = pre_y_scaled
     test['pre_y']=test['pre_y_scaled'] * test['adj_close_std'] + test['adj_close_mean']
-    #test['date'] = datetime.datetime(test['date'])
     layout = go.Layout(
         title = "XGBoost Prediction",
         xaxis = {'title' : "Date"},
@@ -199,6 +184,5 @@ def XGBoostAl(ticker,time_frame):
     )
 
     fig = go.Figure(data=[trace1, trace2], layout=layout)
-    #print('XG',fig)
 
     return fig
