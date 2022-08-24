@@ -5,7 +5,6 @@ This project contains a custom web based dashboard for stocks as well as machine
 ## Features
 
 - Watchlist & Portfolio
-- Prominent Exchanges at a Glance
 - Search Page to Find Information About Any Given Stock
 - Machine Learning Algorithm to Predict Prices of Stocks
 
