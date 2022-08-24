@@ -1,7 +1,5 @@
-
 import pandas as pd
 import numpy as np
-
 from keras.preprocessing.sequence import TimeseriesGenerator
 from keras.models import Sequential
 from keras.layers import LSTM, Dense
@@ -44,9 +42,7 @@ def LSTMAlgorithm(ticker,time_frame):
 
     closeData = closeData.reshape((-1,1))
 
-
     dateData = df['Date'].values
-
 
     splitPercent = 0.80
 
