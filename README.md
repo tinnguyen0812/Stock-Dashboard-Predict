@@ -32,6 +32,7 @@ In the terminal there will be a localhost link (most likely http://127.0.0.1:800
 - Upon launching the program, it may take time for the web app to actually load.
 
 ### Video demo
+https://youtu.be/sqCePBwdqhY
 ### Member
 - 18127230 Nguyen Ba Tin  
 - 18127165 - Luu Thien Nhan 
